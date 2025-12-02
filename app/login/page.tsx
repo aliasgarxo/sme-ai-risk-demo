@@ -1,9 +1,24 @@
+"use client";
+
 import { Navbar } from "@/components/Navbar";
 import { motion } from "framer-motion";
-import { loginAsSME, loginAsAdmin } from "./actions";
 import { User, Shield } from "lucide-react";
+import { useRouter } from "next/navigation";
 
 export default function LoginPage() {
+    const router = useRouter();
+
+    const handleSmeLogin = () => {
+        // Set a client-side cookie for demo purposes if needed, or just redirect
+        document.cookie = "demo_role=user; path=/";
+        router.push("/dashboard");
+    };
+
+    const handleAdminLogin = () => {
+        document.cookie = "demo_role=admin; path=/";
+        router.push("/admin/dashboard");
+    };
+
     return (
         <div className="min-h-screen bg-zinc-50">
             <Navbar />
@@ -25,7 +40,7 @@ export default function LoginPage() {
                     <div className="grid gap-6 md:grid-cols-2">
                         {/* SME User Button */}
                         <button
-                            onClick={() => loginAsSME()}
+                            onClick={handleSmeLogin}
                             className="group flex h-full w-full flex-col items-center justify-center gap-4 rounded-xl border-2 border-canada-red bg-white p-8 transition-all hover:bg-red-50 focus:outline-none focus:ring-4 focus:ring-canada-red/20"
                         >
                             <div className="rounded-full bg-red-100 p-4 transition-colors group-hover:bg-red-200">
@@ -39,7 +54,7 @@ export default function LoginPage() {
 
                         {/* Admin Button */}
                         <button
-                            onClick={() => loginAsAdmin()}
+                            onClick={handleAdminLogin}
                             className="group flex h-full w-full flex-col items-center justify-center gap-4 rounded-xl border-2 border-slate-700 bg-slate-800 p-8 transition-all hover:bg-slate-900 focus:outline-none focus:ring-4 focus:ring-slate-500/20"
                         >
                             <div className="rounded-full bg-slate-700 p-4 transition-colors group-hover:bg-slate-600">
