@@ -9,7 +9,7 @@ export async function POST(req: Request) {
         const BASE_URL = process.env.LANGFLOW_API_URL || "http://127.0.0.1:7860";
 
         // 2. NEW FLOW ID (From Hugging Face)
-        const FLOW_ID = "cfd14857-b73a-4830-a6e6-f6175a0f873a";
+        const FLOW_ID = "566af723-984b-476d-89f1-0605fcdafcf1";
         const URL = `${BASE_URL}/api/v1/run/${FLOW_ID}`;
 
         console.log("Connecting to AI at:", URL);
