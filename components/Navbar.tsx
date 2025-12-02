@@ -36,12 +36,20 @@ export function Navbar() {
                 </Link>
                 <div className="flex items-center gap-4">
                     {user ? (
-                        <button
-                            onClick={handleSignOut}
-                            className="text-sm font-medium text-canada-red hover:text-red-700"
-                        >
-                            Sign Out
-                        </button>
+                        <>
+                            <Link
+                                href="/wizard"
+                                className="hidden text-sm font-medium text-gray-600 hover:text-canada-red sm:block"
+                            >
+                                New Assessment
+                            </Link>
+                            <button
+                                onClick={handleSignOut}
+                                className="text-sm font-medium text-canada-red hover:text-red-700"
+                            >
+                                Sign Out
+                            </button>
+                        </>
                     ) : (
                         <Link
                             href="/login"
