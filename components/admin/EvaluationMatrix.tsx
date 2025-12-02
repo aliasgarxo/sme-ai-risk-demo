@@ -132,16 +132,16 @@ export function EvaluationMatrix() {
 
                 <div className="mt-4 flex items-center justify-end gap-2 text-sm">
                     <span className="text-gray-500">Total Weight:</span>
-                    <span={clsx("font-bold", totalWeight === 100 ? "text-green-600" : "text-red-600")}>
-                    {totalWeight}%
-                </span>
-                {totalWeight !== 100 && (
-                    <span className="flex items-center gap-1 text-xs text-red-600">
-                        <AlertTriangle className="h-3 w-3" /> Must equal 100%
+                    <span className={clsx("font-bold", totalWeight === 100 ? "text-green-600" : "text-red-600")}>
+                        {totalWeight}%
                     </span>
-                )}
+                    {totalWeight !== 100 && (
+                        <span className="flex items-center gap-1 text-xs text-red-600">
+                            <AlertTriangle className="h-3 w-3" /> Must equal 100%
+                        </span>
+                    )}
+                </div>
             </div>
-        </div>
-    </div >
-  );
+        </div >
+    );
 }

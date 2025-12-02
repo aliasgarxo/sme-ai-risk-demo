@@ -36,3 +36,14 @@ export async function demoLogin(role: "user" | "admin") {
         redirect("/dashboard");
     }
 }
+export async function loginAsSME() {
+    const cookieStore = await cookies();
+    cookieStore.set("demo_role", "user");
+    redirect("/dashboard");
+}
+
+export async function loginAsAdmin() {
+    const cookieStore = await cookies();
+    cookieStore.set("demo_role", "admin");
+    redirect("/admin/dashboard");
+}
