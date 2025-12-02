@@ -22,12 +22,48 @@ import { useRouter } from "next/navigation";
 export default function AdminDashboardPage() {
     const router = useRouter();
     const supabase = createClient();
+    const [inputValue, setInputValue] = useState("");
+    const [aiResponse, setAiResponse] = useState<string | null>(null);
+    const [isTyping, setIsTyping] = useState(false);
 
     const handleSignOut = async () => {
-        // Clear demo cookie if present (client-side hack or just rely on supabase signout)
         document.cookie = "demo_role=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
         await supabase.auth.signOut();
         router.push("/login");
+    };
+
+    const handleSend = async (text: string) => {
+        if (!text.trim()) return;
+
+        setIsTyping(true);
+        setAiResponse(null); // Clear previous response
+        setInputValue(text); // Ensure input reflects what was sent (e.g. if clicked chip)
+
+        try {
+            const response = await fetch("/api/chat", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ message: text }),
+            });
+
+            if (!response.ok) throw new Error("Failed to fetch");
+
+            const data = await response.json();
+            let aiText = "Sorry, I couldn't process that.";
+
+            try {
+                aiText = data.outputs[0].outputs[0].results.message.text;
+            } catch (e) {
+                if (data.result) aiText = data.result;
+            }
+
+            setAiResponse(aiText);
+        } catch (error) {
+            console.error("AI Error:", error);
+            setAiResponse("Sorry, I'm having trouble connecting to the AI agent right now.");
+        } finally {
+            setIsTyping(false);
+        }
     };
 
     return (
@@ -75,28 +111,97 @@ export default function AdminDashboardPage() {
 
             {/* Main Content */}
             <main className="ml-64 flex-1 p-8">
-                {/* Header */}
-                <header className="mb-8 flex items-center justify-between">
-                    <div>
-                        <h1 className="text-2xl font-bold text-gray-900">System Overview</h1>
-                        <p className="text-sm text-gray-500">Real-time governance insights across the organization.</p>
-                    </div>
-                    <div className="flex items-center gap-4">
-                        <div className="relative">
-                            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
+                {/* AI Copilot Section */}
+                <section className="mb-12 flex flex-col items-center justify-center text-center">
+                    <motion.div
+                        initial={{ opacity: 0, y: -20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        className="mb-8 w-full max-w-3xl"
+                    >
+                        <h1 className="mb-2 text-4xl font-bold text-gray-900">
+                            How can I help you <span className="text-canada-red">manage risk</span> today?
+                        </h1>
+                        <p className="text-gray-500">Your AI-powered governance assistant is ready.</p>
+                    </motion.div>
+
+                    <div className="relative w-full max-w-2xl">
+                        <div className="relative flex items-center overflow-hidden rounded-full bg-white shadow-xl ring-1 ring-gray-100 transition-all focus-within:ring-2 focus-within:ring-canada-red/20">
+                            <div className="pl-6 text-canada-red">
+                                <Search className="h-5 w-5" />
+                            </div>
                             <input
                                 type="text"
-                                placeholder="Search assessments..."
-                                className="h-10 w-64 rounded-full border border-gray-200 bg-white pl-10 pr-4 text-sm outline-none focus:border-canada-red focus:ring-2 focus:ring-canada-red/10"
+                                value={inputValue}
+                                onChange={(e) => setInputValue(e.target.value)}
+                                onKeyDown={(e) => e.key === "Enter" && handleSend(inputValue)}
+                                placeholder="Ask about compliance, high risk cases, or regulations..."
+                                className="w-full border-none bg-transparent py-4 pl-4 pr-14 text-lg text-gray-900 placeholder:text-gray-400 focus:ring-0"
                             />
+                            <button
+                                onClick={() => handleSend(inputValue)}
+                                disabled={!inputValue.trim() || isTyping}
+                                className="absolute right-2 rounded-full bg-canada-red p-2 text-white transition-transform hover:scale-105 disabled:opacity-50"
+                            >
+                                <TrendingUp className="h-5 w-5" /> {/* Using TrendingUp as a generic 'action' icon or could use Send */}
+                            </button>
                         </div>
-                        <button className="relative rounded-full bg-white p-2 text-gray-500 shadow-sm hover:text-gray-700">
-                            <Bell className="h-5 w-5" />
-                            <span className="absolute right-2 top-2 h-2 w-2 rounded-full bg-red-500 ring-2 ring-white" />
-                        </button>
-                        <div className="h-10 w-10 rounded-full bg-gray-200" />
+
+                        {/* Suggested Chips */}
+                        <div className="mt-4 flex flex-wrap justify-center gap-2">
+                            {[
+                                "Show high risk cases",
+                                "Explain NIST compliance",
+                                "Draft a summary"
+                            ].map((chip) => (
+                                <button
+                                    key={chip}
+                                    onClick={() => handleSend(chip)}
+                                    className="rounded-full border border-gray-200 bg-white px-4 py-1.5 text-sm font-medium text-gray-600 transition-colors hover:border-canada-red hover:text-canada-red"
+                                >
+                                    {chip}
+                                </button>
+                            ))}
+                        </div>
                     </div>
-                </header>
+
+                    {/* Answer Card */}
+                    {(aiResponse || isTyping) && (
+                        <motion.div
+                            initial={{ opacity: 0, y: 10 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            className="mt-8 w-full max-w-3xl rounded-2xl border border-gray-100 bg-white p-8 text-left shadow-lg"
+                        >
+                            <div className="mb-4 flex items-center gap-3">
+                                <div className="flex h-8 w-8 items-center justify-center rounded-full bg-gradient-to-br from-canada-red to-red-600">
+                                    <Shield className="h-4 w-4 text-white" />
+                                </div>
+                                <span className="font-bold text-gray-900">AI Risk Sentinel</span>
+                            </div>
+
+                            {isTyping ? (
+                                <div className="space-y-3">
+                                    <div className="h-4 w-3/4 animate-pulse rounded bg-gray-100" />
+                                    <div className="h-4 w-1/2 animate-pulse rounded bg-gray-100" />
+                                </div>
+                            ) : (
+                                <div className="prose prose-red max-w-none text-gray-700">
+                                    {/* Simple rendering for now, could use ReactMarkdown if imported */}
+                                    <p className="whitespace-pre-wrap">{aiResponse}</p>
+                                </div>
+                            )}
+                        </motion.div>
+                    )}
+                </section>
+
+                {/* Header for Stats */}
+                <div className="mb-6 flex items-center justify-between border-t border-gray-100 pt-8">
+                    <div>
+                        <h2 className="text-xl font-bold text-gray-900">System Overview</h2>
+                    </div>
+                    <div className="flex items-center gap-2 text-sm text-gray-500">
+                        <span>Last updated: Just now</span>
+                    </div>
+                </div>
 
                 {/* Stats Grid */}
                 <div className="mb-8 grid gap-6 md:grid-cols-3">

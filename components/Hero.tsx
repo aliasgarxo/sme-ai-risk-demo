@@ -25,17 +25,11 @@ export function Hero() {
                 </p>
                 <div className="flex flex-col items-center justify-center gap-4 sm:flex-row">
                     <Link
-                        href="/wizard"
+                        href="/login"
                         className="group flex items-center gap-2 rounded-full bg-canada-red px-8 py-4 text-lg font-bold text-white transition-all hover:-translate-y-1 hover:shadow-lg hover:shadow-red-500/30"
                     >
-                        Start Assessment
+                        Get Started
                         <ArrowRight className="h-5 w-5 transition-transform group-hover:translate-x-1" />
-                    </Link>
-                    <Link
-                        href="/learn-more"
-                        className="rounded-full px-8 py-4 text-lg font-medium text-gray-600 transition-colors hover:bg-gray-100 hover:text-gray-900"
-                    >
-                        Learn More
                     </Link>
                 </div>
             </motion.div>
