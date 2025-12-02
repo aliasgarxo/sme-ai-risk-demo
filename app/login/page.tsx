@@ -3,8 +3,25 @@
 import { Navbar } from "@/components/Navbar";
 import { motion } from "framer-motion";
 import Link from "next/link";
+import { login } from "./actions";
+import { useState } from "react";
 
 export default function LoginPage() {
+    const [error, setError] = useState<string | null>(null);
+    const [isLoading, setIsLoading] = useState(false);
+
+    const handleSubmit = async (formData: FormData) => {
+        setIsLoading(true);
+        setError(null);
+
+        const result = await login(formData);
+
+        if (result?.error) {
+            setError(result.error);
+            setIsLoading(false);
+        }
+    };
+
     return (
         <div className="min-h-screen bg-zinc-50">
             <Navbar />
@@ -23,7 +40,12 @@ export default function LoginPage() {
                         Sign in to access your risk assessments.
                     </p>
 
-                    <form className="space-y-6" onSubmit={(e) => e.preventDefault()}>
+                    <form className="space-y-6" action={handleSubmit}>
+                        {error && (
+                            <div className="rounded-lg bg-red-50 p-3 text-sm text-red-600 text-center border border-red-100">
+                                {error}
+                            </div>
+                        )}
                         <div>
                             <label
                                 htmlFor="email"
@@ -33,7 +55,9 @@ export default function LoginPage() {
                             </label>
                             <input
                                 type="email"
+                                name="email"
                                 id="email"
+                                required
                                 className="mt-1 block w-full rounded-lg border-2 border-gray-200 px-4 py-3 outline-none transition-colors focus:border-canada-red focus:ring-4 focus:ring-canada-red/10"
                                 placeholder="you@company.com"
                             />
@@ -48,7 +72,9 @@ export default function LoginPage() {
                             </label>
                             <input
                                 type="password"
+                                name="password"
                                 id="password"
+                                required
                                 className="mt-1 block w-full rounded-lg border-2 border-gray-200 px-4 py-3 outline-none transition-colors focus:border-canada-red focus:ring-4 focus:ring-canada-red/10"
                                 placeholder="••••••••"
                             />
@@ -56,10 +82,10 @@ export default function LoginPage() {
 
                         <button
                             type="submit"
-                            className="w-full rounded-full bg-canada-red py-3 text-lg font-bold text-white transition-colors hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-canada-red focus:ring-offset-2"
-                            onClick={() => window.location.href = "/dashboard"}
+                            disabled={isLoading}
+                            className="w-full rounded-full bg-canada-red py-3 text-lg font-bold text-white transition-colors hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-canada-red focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed"
                         >
-                            Sign In
+                            {isLoading ? "Signing In..." : "Sign In"}
                         </button>
                     </form>
 
