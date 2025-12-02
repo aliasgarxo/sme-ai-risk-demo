@@ -19,6 +19,8 @@ import clsx from "clsx";
 import { createClient } from "@/utils/supabase/client";
 import { useRouter } from "next/navigation";
 
+import ReactMarkdown from "react-markdown";
+
 export default function AdminDashboardPage() {
     const router = useRouter();
     const supabase = createClient();
@@ -185,8 +187,21 @@ export default function AdminDashboardPage() {
                                 </div>
                             ) : (
                                 <div className="prose prose-red max-w-none text-gray-700">
-                                    {/* Simple rendering for now, could use ReactMarkdown if imported */}
-                                    <p className="whitespace-pre-wrap">{aiResponse}</p>
+                                    <ReactMarkdown
+                                        components={{
+                                            strong: ({ node, ...props }: any) => <span className="font-bold text-canada-red" {...props} />,
+                                            ul: ({ node, ...props }: any) => <ul className="my-2 list-disc space-y-2 pl-5" {...props} />,
+                                            ol: ({ node, ...props }: any) => <ol className="my-2 list-decimal space-y-2 pl-5" {...props} />,
+                                            li: ({ node, ...props }: any) => <li className="text-gray-700" {...props} />,
+                                            a: ({ node, ...props }: any) => <a className="text-blue-600 underline transition-colors hover:text-red-600" {...props} />,
+                                            p: ({ node, ...props }: any) => <p className="mb-3 leading-relaxed text-zinc-700" {...props} />,
+                                            h1: ({ node, ...props }: any) => <h1 className="mb-2 mt-4 text-lg font-semibold text-zinc-900" {...props} />,
+                                            h2: ({ node, ...props }: any) => <h2 className="mb-2 mt-4 text-lg font-semibold text-zinc-900" {...props} />,
+                                            h3: ({ node, ...props }: any) => <h3 className="mb-2 mt-4 text-base font-semibold text-zinc-900" {...props} />,
+                                        }}
+                                    >
+                                        {aiResponse || ""}
+                                    </ReactMarkdown>
                                 </div>
                             )}
                         </motion.div>
