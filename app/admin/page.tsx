@@ -1,85 +1,103 @@
 "use client";
 
-import { Navbar } from "@/components/Navbar";
-import { motion } from "framer-motion";
-import { Save, Upload } from "lucide-react";
+import { useState } from "react";
+import { AdminCopilot } from "@/components/admin/AdminCopilot";
+import { EvaluationMatrix } from "@/components/admin/EvaluationMatrix";
+import { KnowledgeBase } from "@/components/admin/KnowledgeBase";
+import { Shield, LayoutDashboard, FileText, LogOut } from "lucide-react";
+import Link from "next/link";
+import clsx from "clsx";
+import { createClient } from "@/utils/supabase/client";
+import { useRouter } from "next/navigation";
 
 export default function AdminPage() {
+    const [activeTab, setActiveTab] = useState<"matrix" | "knowledge">("matrix");
+    const router = useRouter();
+    const supabase = createClient();
+
+    const handleSignOut = async () => {
+        await supabase.auth.signOut();
+        router.push("/login");
+    };
+
     return (
-        <div className="min-h-screen bg-zinc-50 pb-20">
-            <Navbar />
-
-            <div className="container mx-auto max-w-4xl px-4 pt-12">
-                <motion.div
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.6 }}
-                >
-                    <div className="mb-8 flex items-center justify-between">
-                        <div>
-                            <h1 className="text-3xl font-bold text-gray-900">
-                                Knowledge Base Admin
-                            </h1>
-                            <p className="text-gray-600">
-                                Update the regulatory content and risk rules without coding.
-                            </p>
+        <div className="min-h-screen bg-zinc-50 font-lato">
+            {/* Admin Header */}
+            <header className="sticky top-0 z-50 border-b border-zinc-800 bg-zinc-900 text-white">
+                <div className="container mx-auto flex h-16 items-center justify-between px-4">
+                    <div className="flex items-center gap-3">
+                        <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-canada-red">
+                            <Shield className="h-5 w-5 text-white" />
                         </div>
-                        <div className="rounded-full bg-canada-red/10 px-4 py-1 text-sm font-medium text-canada-red">
-                            Admin Access
+                        <span className="text-lg font-bold tracking-tight">Admin Console</span>
+                        <span className="rounded-full bg-zinc-800 px-2 py-0.5 text-xs font-medium text-zinc-400">
+                            v2.0
+                        </span>
+                    </div>
+
+                    <div className="flex items-center gap-6">
+                        <Link
+                            href="/dashboard"
+                            className="text-sm font-medium text-zinc-400 hover:text-white transition-colors"
+                        >
+                            Exit to Dashboard
+                        </Link>
+                        <button
+                            onClick={handleSignOut}
+                            className="flex items-center gap-2 text-sm font-medium text-red-400 hover:text-red-300 transition-colors"
+                        >
+                            <LogOut className="h-4 w-4" /> Sign Out
+                        </button>
+                    </div>
+                </div>
+            </header>
+
+            <main className="container mx-auto px-4 py-8">
+                {/* Top Section: Admin Copilot */}
+                <section className="mb-12">
+                    <AdminCopilot />
+                </section>
+
+                {/* Bottom Section: Configuration Tabs */}
+                <section>
+                    <div className="mb-6 flex items-center justify-between">
+                        <h2 className="text-2xl font-bold text-gray-900">System Configuration</h2>
+                    </div>
+
+                    <div className="mb-8 border-b border-gray-200">
+                        <div className="flex gap-8">
+                            <button
+                                onClick={() => setActiveTab("matrix")}
+                                className={clsx(
+                                    "flex items-center gap-2 border-b-2 pb-4 text-sm font-medium transition-colors",
+                                    activeTab === "matrix"
+                                        ? "border-canada-red text-canada-red"
+                                        : "border-transparent text-gray-500 hover:text-gray-700"
+                                )}
+                            >
+                                <LayoutDashboard className="h-4 w-4" />
+                                Risk Matrix
+                            </button>
+                            <button
+                                onClick={() => setActiveTab("knowledge")}
+                                className={clsx(
+                                    "flex items-center gap-2 border-b-2 pb-4 text-sm font-medium transition-colors",
+                                    activeTab === "knowledge"
+                                        ? "border-canada-red text-canada-red"
+                                        : "border-transparent text-gray-500 hover:text-gray-700"
+                                )}
+                            >
+                                <FileText className="h-4 w-4" />
+                                Knowledge Base
+                            </button>
                         </div>
                     </div>
 
-                    <div className="grid gap-8">
-                        {/* Content Editor */}
-                        <div className="rounded-2xl bg-white p-8 shadow-lg">
-                            <h2 className="mb-6 text-xl font-bold text-gray-900">
-                                Update Risk Rules
-                            </h2>
-                            <div className="mb-6">
-                                <label className="mb-2 block text-sm font-medium text-gray-700">
-                                    Risk Logic (JSON/Text)
-                                </label>
-                                <textarea
-                                    className="h-64 w-full rounded-xl border-2 border-gray-200 p-4 font-mono text-sm outline-none transition-all focus:border-canada-red focus:ring-4 focus:ring-canada-red/10"
-                                    defaultValue={`{
-  "high_risk_keywords": ["PII", "biometric", "hiring", "credit"],
-  "medium_risk_keywords": ["internal", "optimization", "analytics"],
-  "compliance_standards": ["AIDA", "GDPR", "PIPEDA"]
-}`}
-                                />
-                            </div>
-                            <div className="flex justify-end gap-4">
-                                <button className="flex items-center gap-2 rounded-lg border border-gray-200 px-4 py-2 font-medium text-gray-700 hover:bg-gray-50">
-                                    <Upload className="h-4 w-4" /> Import File
-                                </button>
-                                <button className="flex items-center gap-2 rounded-lg bg-canada-red px-6 py-2 font-bold text-white hover:bg-red-700">
-                                    <Save className="h-4 w-4" /> Save Changes
-                                </button>
-                            </div>
-                        </div>
-
-                        {/* Recent Updates Log */}
-                        <div className="rounded-2xl bg-white p-8 shadow-lg">
-                            <h2 className="mb-6 text-xl font-bold text-gray-900">
-                                Recent Updates
-                            </h2>
-                            <div className="space-y-4">
-                                {[1, 2, 3].map((i) => (
-                                    <div key={i} className="flex items-center justify-between border-b border-gray-100 pb-4 last:border-0 last:pb-0">
-                                        <div>
-                                            <p className="font-medium text-gray-900">Updated compliance rules for AIDA</p>
-                                            <p className="text-sm text-gray-500">Modified by Admin • 2 hours ago</p>
-                                        </div>
-                                        <span className="rounded-full bg-green-100 px-3 py-1 text-xs font-medium text-green-700">
-                                            Published
-                                        </span>
-                                    </div>
-                                ))}
-                            </div>
-                        </div>
+                    <div className="min-h-[400px]">
+                        {activeTab === "matrix" ? <EvaluationMatrix /> : <KnowledgeBase />}
                     </div>
-                </motion.div>
-            </div>
+                </section>
+            </main>
         </div>
     );
 }

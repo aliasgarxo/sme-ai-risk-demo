@@ -58,8 +58,28 @@ export async function middleware(request: NextRequest) {
         data: { user },
     } = await supabase.auth.getUser();
 
+    const demoRole = request.cookies.get("demo_role")?.value;
+
+    if (demoRole) {
+        if (request.nextUrl.pathname.startsWith("/admin")) {
+            if (demoRole !== "admin") {
+                return NextResponse.redirect(new URL("/dashboard", request.url));
+            }
+        }
+        return response;
+    }
+
     if (request.nextUrl.pathname.startsWith("/dashboard") && !user) {
         return NextResponse.redirect(new URL("/login", request.url));
+    }
+
+    if (request.nextUrl.pathname.startsWith("/admin")) {
+        if (!user) {
+            return NextResponse.redirect(new URL("/login", request.url));
+        }
+        if (user.email !== "admin@demo.com") {
+            return NextResponse.redirect(new URL("/dashboard", request.url));
+        }
     }
 
     return response;
