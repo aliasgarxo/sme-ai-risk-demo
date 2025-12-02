@@ -2,21 +2,16 @@
 
 import { Navbar } from "@/components/Navbar";
 import { motion } from "framer-motion";
-import { User, Shield } from "lucide-react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 
 export default function LoginPage() {
     const router = useRouter();
 
-    const handleSmeLogin = () => {
-        // Set a client-side cookie for demo purposes if needed, or just redirect
+    const handleSignIn = () => {
+        // Set cookie to bypass middleware
         document.cookie = "demo_role=user; path=/";
         router.push("/dashboard");
-    };
-
-    const handleAdminLogin = () => {
-        document.cookie = "demo_role=admin; path=/";
-        router.push("/admin/dashboard");
     };
 
     return (
@@ -28,48 +23,78 @@ export default function LoginPage() {
                     initial={{ opacity: 0, scale: 0.95 }}
                     animate={{ opacity: 1, scale: 1 }}
                     transition={{ duration: 0.4 }}
-                    className="w-full max-w-2xl rounded-2xl bg-white p-12 shadow-xl"
+                    className="w-full max-w-md rounded-2xl bg-white p-8 shadow-xl"
                 >
                     <h1 className="mb-2 text-3xl font-bold text-gray-900 text-center">
-                        Welcome to SME AI Risk Register
+                        Welcome Back
                     </h1>
-                    <p className="mb-12 text-center text-gray-600">
-                        Select a role to explore the platform.
+                    <p className="mb-8 text-center text-gray-600">
+                        Sign in to access your risk assessments.
                     </p>
 
-                    <div className="grid gap-6 md:grid-cols-2">
-                        {/* SME User Button */}
-                        <button
-                            onClick={handleSmeLogin}
-                            className="group flex h-full w-full flex-col items-center justify-center gap-4 rounded-xl border-2 border-canada-red bg-white p-8 transition-all hover:bg-red-50 focus:outline-none focus:ring-4 focus:ring-canada-red/20"
-                        >
-                            <div className="rounded-full bg-red-100 p-4 transition-colors group-hover:bg-red-200">
-                                <User className="h-8 w-8 text-canada-red" />
-                            </div>
-                            <div className="text-center">
-                                <h3 className="text-xl font-bold text-gray-900">Login as SME User</h3>
-                                <p className="text-sm text-gray-500">Pre-filled: user@demo.com</p>
-                            </div>
-                        </button>
+                    <form className="space-y-6">
+                        <div>
+                            <label
+                                htmlFor="email"
+                                className="block text-sm font-medium text-gray-700"
+                            >
+                                Email Address
+                            </label>
+                            <input
+                                type="text"
+                                name="email"
+                                id="email"
+                                defaultValue="demo@sme.com"
+                                className="mt-1 block w-full rounded-lg border-2 border-gray-200 px-4 py-3 outline-none transition-colors focus:border-canada-red focus:ring-4 focus:ring-canada-red/10"
+                                placeholder="you@company.com"
+                            />
+                        </div>
 
-                        {/* Admin Button */}
+                        <div>
+                            <label
+                                htmlFor="password"
+                                className="block text-sm font-medium text-gray-700"
+                            >
+                                Password
+                            </label>
+                            <input
+                                type="password"
+                                name="password"
+                                id="password"
+                                defaultValue="password"
+                                className="mt-1 block w-full rounded-lg border-2 border-gray-200 px-4 py-3 outline-none transition-colors focus:border-canada-red focus:ring-4 focus:ring-canada-red/10"
+                                placeholder="••••••••"
+                            />
+                        </div>
+
                         <button
-                            onClick={handleAdminLogin}
-                            className="group flex h-full w-full flex-col items-center justify-center gap-4 rounded-xl border-2 border-slate-700 bg-slate-800 p-8 transition-all hover:bg-slate-900 focus:outline-none focus:ring-4 focus:ring-slate-500/20"
+                            type="button"
+                            onClick={handleSignIn}
+                            className="w-full rounded-full bg-canada-red py-3 text-lg font-bold text-white transition-colors hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-canada-red focus:ring-offset-2"
                         >
-                            <div className="rounded-full bg-slate-700 p-4 transition-colors group-hover:bg-slate-600">
-                                <Shield className="h-8 w-8 text-white" />
-                            </div>
-                            <div className="text-center">
-                                <h3 className="text-xl font-bold text-white">Login as Admin</h3>
-                                <p className="text-sm text-slate-400">Global Oversight View</p>
-                            </div>
+                            Sign In
                         </button>
+                    </form>
+
+                    <div className="mt-6 text-center">
+                        <p className="text-sm text-gray-600">
+                            Don't have an account?{" "}
+                            <Link href="/signup" className="font-medium text-canada-red hover:underline">
+                                Sign up
+                            </Link>
+                        </p>
+                        <div className="mt-4">
+                            <button
+                                onClick={() => {
+                                    document.cookie = "demo_role=admin; path=/";
+                                    router.push("/admin/dashboard");
+                                }}
+                                className="text-xs text-gray-400 hover:text-gray-600 underline"
+                            >
+                                Login as Admin
+                            </button>
+                        </div>
                     </div>
-
-                    <p className="mt-12 text-center text-sm text-gray-500">
-                        This is a friction-free demo environment. No password required.
-                    </p>
                 </motion.div>
             </div>
         </div>
