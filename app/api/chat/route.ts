@@ -44,6 +44,8 @@ export async function POST(req: Request) {
         console.error("Proxy Error:", error);
         // @ts-ignore
         if (error.cause) console.error("Error Cause:", error.cause);
-        return NextResponse.json({ error: "Failed to connect to AI" }, { status: 500 });
+        return NextResponse.json({
+            error: error instanceof Error ? error.message : "Failed to connect to AI"
+        }, { status: 500 });
     }
 }

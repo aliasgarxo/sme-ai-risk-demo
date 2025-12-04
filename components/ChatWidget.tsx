@@ -56,7 +56,8 @@ export function ChatWidget() {
             });
 
             if (!response.ok) {
-                throw new Error("Failed to fetch response");
+                const errorData = await response.json().catch(() => ({ error: "Unknown error" }));
+                throw new Error(errorData.error || `HTTP ${response.status}`);
             }
 
             const data = await response.json();
