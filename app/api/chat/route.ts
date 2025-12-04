@@ -36,6 +36,13 @@ export async function POST(req: Request) {
             throw new Error(`LangFlow Error: ${response.status} ${errorText}`);
         }
 
+        const contentType = response.headers.get("content-type");
+        if (contentType && contentType.includes("text/html")) {
+            const html = await response.text();
+            console.error("Received HTML from LangFlow:", html.substring(0, 200)); // Log first 200 chars
+            throw new Error("Received HTML instead of JSON. The URL might be wrong, or the Space is private/building.");
+        }
+
         const data = await response.json();
         console.log("LangFlow Response Success");
         return NextResponse.json(data);
