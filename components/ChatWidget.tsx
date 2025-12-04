@@ -84,7 +84,7 @@ export function ChatWidget() {
             const errorMessage: Message = {
                 id: (Date.now() + 1).toString(),
                 role: "assistant",
-                content: "Sorry, I'm having trouble connecting to the AI agent right now. Please ensure LangFlow is running locally.",
+                content: error instanceof Error ? `Error: ${error.message}` : "Sorry, I'm having trouble connecting to the AI agent right now.",
             };
             setMessages((prev) => [...prev, errorMessage]);
         } finally {
