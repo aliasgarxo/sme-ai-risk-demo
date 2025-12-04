@@ -11,7 +11,7 @@ export async function POST(req: Request) {
         const BASE_URL = process.env.LANGFLOW_API_URL || "http://127.0.0.1:7860";
 
         // 2. NEW FLOW ID (From Hugging Face)
-        const FLOW_ID = "566af723-984b-476d-89f1-0605fcdafcf1";
+        const FLOW_ID = "ef523106-c38c-43ff-b74d-b7e71ea1a602";
         const URL = `${BASE_URL}/api/v1/run/${FLOW_ID}`;
 
         console.log("--- CHAT DEBUG ---");
@@ -19,9 +19,18 @@ export async function POST(req: Request) {
         console.log("Connecting to AI at:", URL);
         console.log("Payload:", JSON.stringify({ input_value: inputValue, input_type: "chat", output_type: "chat" }));
 
+        const headers: Record<string, string> = {
+            'Content-Type': 'application/json',
+        };
+
+        // Add Authorization token if present (for Private Spaces)
+        if (process.env.HF_TOKEN) {
+            headers['Authorization'] = `Bearer ${process.env.HF_TOKEN}`;
+        }
+
         const response = await fetch(URL, {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+            headers: headers,
             body: JSON.stringify({
                 input_value: inputValue,
                 input_type: "chat",
