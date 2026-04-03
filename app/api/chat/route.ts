@@ -1,67 +1,69 @@
-import { NextResponse } from 'next/server';
+import { NextResponse } from "next/server";
+import Anthropic from "@anthropic-ai/sdk";
+
+const SYSTEM_PROMPT = `You are the AI Risk Sentinel, an expert AI governance assistant for Canadian small and medium enterprises (SMEs).
+
+Your expertise covers:
+- NIST AI Risk Management Framework (AI RMF 1.0) — Govern, Map, Measure, Manage functions
+- ISO/IEC 42001:2023 — AI Management System standard
+- Canadian privacy law: PIPEDA and Quebec Law 25
+- EU AI Act (relevant for Canadian companies exporting to EU)
+- ESG and supply chain risk for SMEs
+- Practical AI governance for non-technical business owners
+
+Your role:
+- Help users understand AI risks in plain, accessible language
+- Guide them through risk assessment concepts
+- Explain compliance requirements relevant to their situation
+- Suggest practical, affordable controls for SMEs
+- Flag high-risk scenarios clearly
+
+Tone: Professional but approachable. Concise. Avoid jargon — explain terms when you use them.
+Format: Use markdown for structure (bullets, bold headings) when helpful. Keep responses focused and actionable.
+Never give legal advice — recommend consulting a lawyer for specific legal questions.`;
 
 export async function POST(req: Request) {
-    try {
-        const body = await req.json();
-        const inputValue = body.message;
-
-        // 1. DYNAMIC URL: Use Vercel Env Var or Localhost
-        // IMPORTANT: LANGFLOW_API_URL should be in the format "https://username-space.hf.space"
-        // Do NOT include "/api" or trailing slashes.
-        const BASE_URL = process.env.LANGFLOW_API_URL || "http://127.0.0.1:7860";
-
-        // 2. NEW FLOW ID (From Hugging Face)
-        const FLOW_ID = "ef523106-c38c-43ff-b74d-b7e71ea1a602";
-        const URL = `${BASE_URL}/api/v1/run/${FLOW_ID}`;
-
-        console.log("--- CHAT DEBUG ---");
-        console.log("BASE_URL:", BASE_URL);
-        console.log("Connecting to AI at:", URL);
-        console.log("Payload:", JSON.stringify({ input_value: inputValue, input_type: "chat", output_type: "chat" }));
-
-        const headers: Record<string, string> = {
-            'Content-Type': 'application/json',
-        };
-
-        // Add Authorization token if present (for Private Spaces)
-        if (process.env.HF_TOKEN) {
-            headers['Authorization'] = `Bearer ${process.env.HF_TOKEN}`;
-        }
-
-        const response = await fetch(URL, {
-            method: 'POST',
-            headers: headers,
-            body: JSON.stringify({
-                input_value: inputValue,
-                input_type: "chat",
-                output_type: "chat",
-                session_id: crypto.randomUUID()
-            })
-        });
-
-        if (!response.ok) {
-            const errorText = await response.text();
-            console.error("LangFlow API Error:", response.status, errorText);
-            throw new Error(`LangFlow Error: ${response.status} ${errorText}`);
-        }
-
-        const contentType = response.headers.get("content-type");
-        if (contentType && contentType.includes("text/html")) {
-            const html = await response.text();
-            console.error("Received HTML from LangFlow:", html.substring(0, 200)); // Log first 200 chars
-            throw new Error("Received HTML instead of JSON. The URL might be wrong, or the Space is private/building.");
-        }
-
-        const data = await response.json();
-        console.log("LangFlow Response Success");
-        return NextResponse.json(data);
-
-    } catch (error) {
-        console.error("Proxy Error:", error);
-        // @ts-ignore
-        if (error.cause) console.error("Error Cause:", error.cause);
-        return NextResponse.json({
-            error: error instanceof Error ? error.message : "Failed to connect to AI"
-        }, { status: 500 });
+  try {
+    if (!process.env.ANTHROPIC_API_KEY) {
+      return NextResponse.json(
+        { error: "ANTHROPIC_API_KEY is not configured." },
+        { status: 503 }
+      );
     }
+
+    const { message, history } = await req.json();
+
+    if (!message?.trim()) {
+      return NextResponse.json({ error: "Message is required." }, { status: 400 });
+    }
+
+    const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
+
+    // Build message history if provided (for multi-turn chat)
+    const messages: Anthropic.MessageParam[] = [];
+    if (Array.isArray(history)) {
+      for (const h of history) {
+        if (h.role === "user" || h.role === "assistant") {
+          messages.push({ role: h.role, content: h.content });
+        }
+      }
+    }
+    messages.push({ role: "user", content: message });
+
+    const response = await client.messages.create({
+      model: "claude-haiku-4-5-20251001", // Fast, cost-effective for chat
+      max_tokens: 600,
+      system: SYSTEM_PROMPT,
+      messages,
+    });
+
+    const text = (response.content[0] as { text: string }).text;
+    return NextResponse.json({ result: text });
+  } catch (error) {
+    console.error("[/api/chat] Error:", error);
+    return NextResponse.json(
+      { error: error instanceof Error ? error.message : "Failed to connect to AI." },
+      { status: 500 }
+    );
+  }
 }

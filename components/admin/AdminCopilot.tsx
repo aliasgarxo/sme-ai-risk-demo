@@ -55,14 +55,7 @@ export function AdminCopilot() {
             }
 
             const data = await response.json();
-
-            let aiText = "Sorry, I couldn't process that response.";
-            try {
-                aiText = data.outputs[0].outputs[0].results.message.text;
-            } catch (e) {
-                console.error("Error parsing LangFlow response:", e);
-                if (data.result) aiText = data.result;
-            }
+            const aiText: string = data.result ?? "Sorry, I couldn't process that response.";
 
             const aiMessage: Message = {
                 id: (Date.now() + 1).toString(),

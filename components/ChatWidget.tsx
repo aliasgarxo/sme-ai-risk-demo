@@ -33,17 +33,18 @@ export function ChatWidget() {
         scrollToBottom();
     }, [messages, isTyping]);
 
-    const handleSend = async () => {
-        if (!inputValue.trim()) return;
+    const handleSend = async (overrideText?: string) => {
+        const text = overrideText ?? inputValue;
+        if (!text.trim()) return;
 
         const userMessage: Message = {
             id: Date.now().toString(),
             role: "user",
-            content: inputValue,
+            content: text,
         };
 
         setMessages((prev) => [...prev, userMessage]);
-        setInputValue("");
+        if (!overrideText) setInputValue("");
         setIsTyping(true);
 
         try {
@@ -61,17 +62,7 @@ export function ChatWidget() {
             }
 
             const data = await response.json();
-
-            // Attempt to extract message from LangFlow structure
-            // Structure: outputs[0].outputs[0].results.message.text
-            let aiText = "Sorry, I couldn't process that response.";
-            try {
-                aiText = data.outputs[0].outputs[0].results.message.text;
-            } catch (e) {
-                console.error("Error parsing LangFlow response:", e);
-                // Fallback if structure is different
-                if (data.result) aiText = data.result;
-            }
+            const aiText: string = data.result ?? "Sorry, I couldn't process that response.";
 
             const aiMessage: Message = {
                 id: (Date.now() + 1).toString(),

@@ -16,23 +16,16 @@ import {
 import Link from "next/link";
 import { motion } from "framer-motion";
 import clsx from "clsx";
-import { createClient } from "@/utils/supabase/client";
-import { useRouter } from "next/navigation";
+import { logout } from "@/app/login/actions";
 
 import ReactMarkdown from "react-markdown";
 
 export default function AdminDashboardPage() {
-    const router = useRouter();
-    const supabase = createClient();
     const [inputValue, setInputValue] = useState("");
     const [aiResponse, setAiResponse] = useState<string | null>(null);
     const [isTyping, setIsTyping] = useState(false);
 
-    const handleSignOut = async () => {
-        document.cookie = "demo_role=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
-        await supabase.auth.signOut();
-        router.push("/login");
-    };
+    const handleSignOut = () => logout();
 
     const handleSend = async (text: string) => {
         if (!text.trim()) return;
@@ -51,13 +44,7 @@ export default function AdminDashboardPage() {
             if (!response.ok) throw new Error("Failed to fetch");
 
             const data = await response.json();
-            let aiText = "Sorry, I couldn't process that.";
-
-            try {
-                aiText = data.outputs[0].outputs[0].results.message.text;
-            } catch (e) {
-                if (data.result) aiText = data.result;
-            }
+            const aiText: string = data.result ?? "Sorry, I couldn't process that.";
 
             setAiResponse(aiText);
         } catch (error) {

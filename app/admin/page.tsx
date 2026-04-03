@@ -7,18 +7,12 @@ import { KnowledgeBase } from "@/components/admin/KnowledgeBase";
 import { Shield, LayoutDashboard, FileText, LogOut } from "lucide-react";
 import Link from "next/link";
 import clsx from "clsx";
-import { createClient } from "@/utils/supabase/client";
-import { useRouter } from "next/navigation";
+import { logout } from "@/app/login/actions";
 
 export default function AdminPage() {
     const [activeTab, setActiveTab] = useState<"matrix" | "knowledge">("matrix");
-    const router = useRouter();
-    const supabase = createClient();
 
-    const handleSignOut = async () => {
-        await supabase.auth.signOut();
-        router.push("/login");
-    };
+    const handleSignOut = () => logout();
 
     return (
         <div className="min-h-screen bg-zinc-50 font-lato">

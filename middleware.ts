@@ -1,99 +1,30 @@
-import { createServerClient, type CookieOptions } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 
-export async function middleware(request: NextRequest) {
-    let response = NextResponse.next({
-        request: {
-            headers: request.headers,
-        },
-    });
+export function middleware(request: NextRequest) {
+  const { pathname } = request.nextUrl;
+  const role = request.cookies.get("app_role")?.value;
 
-    const supabase = createServerClient(
-        process.env.NEXT_PUBLIC_SUPABASE_URL!,
-        process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-        {
-            cookies: {
-                get(name: string) {
-                    return request.cookies.get(name)?.value;
-                },
-                set(name: string, value: string, options: CookieOptions) {
-                    request.cookies.set({
-                        name,
-                        value,
-                        ...options,
-                    });
-                    response = NextResponse.next({
-                        request: {
-                            headers: request.headers,
-                        },
-                    });
-                    response.cookies.set({
-                        name,
-                        value,
-                        ...options,
-                    });
-                },
-                remove(name: string, options: CookieOptions) {
-                    request.cookies.set({
-                        name,
-                        value: "",
-                        ...options,
-                    });
-                    response = NextResponse.next({
-                        request: {
-                            headers: request.headers,
-                        },
-                    });
-                    response.cookies.set({
-                        name,
-                        value: "",
-                        ...options,
-                    });
-                },
-            },
-        }
-    );
+  // Protect /dashboard — any logged-in user
+  if (pathname.startsWith("/dashboard") && !role) {
+    return NextResponse.redirect(new URL("/login", request.url));
+  }
 
-    const {
-        data: { user },
-    } = await supabase.auth.getUser();
+  // Protect /wizard and /results — any logged-in user
+  if ((pathname.startsWith("/wizard") || pathname.startsWith("/results")) && !role) {
+    return NextResponse.redirect(new URL("/login", request.url));
+  }
 
-    const demoRole = request.cookies.get("demo_role")?.value;
+  // Protect /admin — admin only
+  if (pathname.startsWith("/admin")) {
+    if (!role) return NextResponse.redirect(new URL("/login", request.url));
+    if (role !== "admin") return NextResponse.redirect(new URL("/dashboard", request.url));
+  }
 
-    if (demoRole) {
-        if (request.nextUrl.pathname.startsWith("/admin")) {
-            if (demoRole !== "admin") {
-                return NextResponse.redirect(new URL("/dashboard", request.url));
-            }
-        }
-        return response;
-    }
-
-    if (request.nextUrl.pathname.startsWith("/dashboard") && !user) {
-        return NextResponse.redirect(new URL("/login", request.url));
-    }
-
-    if (request.nextUrl.pathname.startsWith("/admin")) {
-        if (!user) {
-            return NextResponse.redirect(new URL("/login", request.url));
-        }
-        if (user.email !== "admin@demo.com") {
-            return NextResponse.redirect(new URL("/dashboard", request.url));
-        }
-    }
-
-    return response;
+  return NextResponse.next();
 }
 
 export const config = {
-    matcher: [
-        /*
-         * Match all request paths except for the ones starting with:
-         * - _next/static (static files)
-         * - _next/image (image optimization files)
-         * - favicon.ico (favicon file)
-         * Feel free to modify this pattern to include more paths.
-         */
-        "/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)",
-    ],
+  matcher: [
+    "/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)",
+  ],
 };
