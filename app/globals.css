@@ -6,7 +6,7 @@
   --color-aurora-purple: #4F46E5;
   --color-aurora-blue: #1e1b4b;
 
-  --font-lato: var(--font-lato);
+  --font-lato: "Lato";
 }
 
 :root {
