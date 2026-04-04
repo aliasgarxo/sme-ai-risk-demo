@@ -10,8 +10,6 @@
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.82.0",
-    "@supabase/ssr": "^0.8.0",
-    "@supabase/supabase-js": "^2.86.0",
     "clsx": "^2.1.1",
     "framer-motion": "^12.23.25",
     "jspdf": "^4.2.1",
