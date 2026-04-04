@@ -129,7 +129,7 @@ Key PIPEDA obligations for AI systems:
 • Cross-border transfers of personal information must ensure equivalent protection in the recipient jurisdiction.
 `;
 
-// ─── Input shape from wizard ──────────────────────────────────────────────
+// ─── Input shape from wizard ──────────────────────────────────────────────────
 
 export interface WizardInput {
   useCase: string;
@@ -145,7 +145,7 @@ export interface WizardInput {
   geographicScope: string;
 }
 
-// ─── Agent 1: Orchestrator ────────────────────────────────────────────────
+// ─── Agent 1: Orchestrator ────────────────────────────────────────────────────
 
 async function orchestratorAgent(input: WizardInput): Promise<string> {
   const systemPrompt = `You are the Orchestrator Agent for an SME AI Risk Assessment system.
@@ -178,7 +178,7 @@ Summarise this system and flag any immediate concerns.`;
   return (response.content[0] as { text: string }).text;
 }
 
-// ─── Agent 2: Risk Assessor ────────────────────────────────────────────────
+// ─── Agent 2: Risk Assessor ───────────────────────────────────────────────────
 
 interface CriterionScore {
   id: string;
@@ -248,6 +248,7 @@ Score each criterion now.`;
   });
 
   const text = (response.content[0] as { text: string }).text.trim();
+  // Strip any markdown code fences if present
   const cleaned = text.replace(/```json\n?/g, "").replace(/```\n?/g, "").trim();
   const parsed = JSON.parse(cleaned);
   return parsed.scores as CriterionScore[];
@@ -356,7 +357,7 @@ Write the executive summary now.`;
   return (response.content[0] as { text: string }).text.trim();
 }
 
-// ─── Main Orchestration Function ────────────────────────────────────────────────
+// ─── Main Orchestration Function ──────────────────────────────────────────────
 
 export async function runAssessmentPipeline(
   input: WizardInput
@@ -364,9 +365,13 @@ export async function runAssessmentPipeline(
   const id = crypto.randomUUID();
   const createdAt = new Date().toISOString();
 
+  // Agent 1: Orchestrate and summarise
   const orchestratorSummary = await orchestratorAgent(input);
+
+  // Agent 2: Score each criterion
   const criterionScores = await riskAssessorAgent(input, orchestratorSummary);
 
+  // Build criterion results
   const criteriaResults: CriterionResult[] = criterionScores.map((cs) => {
     const def = SCORING_CRITERIA.find(
       (c) => c.id === cs.id
@@ -387,7 +392,10 @@ export async function runAssessmentPipeline(
   const overallScore = calculateOverallScore(criteriaResults);
   const overallRiskLevel = scoreToRiskLevel(overallScore);
 
+  // Agent 3: Controls and recommendations
   const controls = await controlsAdvisorAgent(input, criterionScores);
+
+  // Agent 4: Plain-language summary
   const summary = await guidanceWriterAgent(input, controls, overallScore);
 
   return {
