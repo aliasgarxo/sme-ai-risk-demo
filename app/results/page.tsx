@@ -72,6 +72,12 @@ function ScoreGauge({ score }: { score: number }) {
   );
 }
 
+function confidenceColor(conf: number) {
+  if (conf >= 80) return "bg-green-100 text-green-700";
+  if (conf >= 60) return "bg-amber-100 text-amber-700";
+  return "bg-red-100 text-red-700";
+}
+
 function CriterionCard({ criterion }: { criterion: AssessmentResult["criteria"][0] }) {
   const [expanded, setExpanded] = useState(false);
   const colors = riskColor(criterion.riskLevel);
@@ -81,11 +87,16 @@ function CriterionCard({ criterion }: { criterion: AssessmentResult["criteria"][
     <div className={clsx("rounded-xl border-2 p-5 transition-all", colors.border, colors.bg)}>
       <div className="flex items-start justify-between gap-4">
         <div className="flex-1">
-          <div className="mb-1 flex items-center gap-2">
+          <div className="mb-1 flex items-center gap-2 flex-wrap">
             <span className="font-bold text-gray-900">{criterion.name}</span>
             <span className={clsx("rounded-full px-2 py-0.5 text-xs font-semibold", colors.badge)}>
               {criterion.riskLevel}
             </span>
+            {criterion.confidence != null && (
+              <span className={clsx("rounded-full px-2 py-0.5 text-xs font-medium", confidenceColor(criterion.confidence))}>
+                {criterion.confidence}% confidence
+              </span>
+            )}
           </div>
           <div className="mb-2 flex items-center gap-2">
             <div className="h-2 flex-1 overflow-hidden rounded-full bg-gray-200">
@@ -437,6 +448,29 @@ export default function ResultsPage() {
           </motion.div>
         )}
 
+        {/* ── Consistency Issues (Validation Agent) ── */}
+        {result.consistencyIssues && result.consistencyIssues.length > 0 && (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.18 }}
+            className="mb-8 rounded-2xl border-2 border-amber-300 bg-amber-50 p-6"
+          >
+            <div className="mb-3 flex items-center gap-3 text-amber-700">
+              <Info className="h-5 w-5 shrink-0" />
+              <h2 className="text-sm font-bold uppercase tracking-wide">Validation Notes</h2>
+            </div>
+            <ul className="space-y-1.5">
+              {result.consistencyIssues.map((issue, i) => (
+                <li key={i} className="flex items-start gap-2 text-sm text-amber-800">
+                  <span className="mt-0.5 h-1.5 w-1.5 shrink-0 rounded-full bg-amber-500 mt-2" />
+                  {issue}
+                </li>
+              ))}
+            </ul>
+          </motion.div>
+        )}
+
         {/* ── Criteria Breakdown ── */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -446,7 +480,7 @@ export default function ResultsPage() {
         >
           <h2 className="mb-4 text-2xl font-bold text-gray-900">Risk Breakdown by Criterion</h2>
           <p className="mb-5 text-sm text-gray-500">
-            Click the chevron on any card to see the agent&apos;s rationale for that score.
+            Click the chevron on any card to see the agent&apos;s rationale and evidence confidence.
           </p>
           <div className="grid gap-4 md:grid-cols-2">
             {result.criteria.map((c, i) => (

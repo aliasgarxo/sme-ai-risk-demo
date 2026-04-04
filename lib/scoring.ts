@@ -30,6 +30,7 @@ export interface CriterionResult {
   riskLevel: RiskLevel;
   rationale: string;
   recommendations: string[];
+  confidence?: number; // 0–100, per-criterion evidence confidence
 }
 
 export interface AssessmentResult {
@@ -45,6 +46,7 @@ export interface AssessmentResult {
   immediateActions: string[];
   longerTermActions: string[];
   summary: string;
+  consistencyIssues?: string[]; // flagged by validation agent
   createdAt: string;
 }
 
