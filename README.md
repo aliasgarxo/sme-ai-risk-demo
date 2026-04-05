@@ -129,7 +129,7 @@ AssessmentResult → stored in browser localStorage → rendered on /results
 ### Local Setup
 
 ```bash
-git clone https://github.com/your-username/sme-ai-risk-demo.git
+git clone https://github.com/aliasgarxo/sme-ai-risk-demo.git
 cd sme-ai-risk-demo
 npm install
 ```
@@ -206,5 +206,7 @@ sme-ai-risk-demo/
 ## Academic Context
 
 This application was built as a final project for an academic program focused on AI governance and responsible AI adoption. The goal is to demonstrate how AI can be used to help non-technical SME owners understand and manage the risks of their own AI tool deployments — making compliance with NIST AI RMF, ISO 42001, PIPEDA, GDPR, and the EU AI Act accessible without requiring a dedicated legal or AI governance team.
+
+Built by Aliasgar Husain.
 
 The assessment pipeline is intentionally transparent: all regulatory citations reference real, publicly available framework documents. The per-criterion confidence scores and validation agent flag areas where the evidence provided in the wizard was insufficient to make a high-confidence scoring decision.
