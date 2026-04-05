@@ -25,6 +25,13 @@ const client = new Anthropic({
   apiKey: process.env.ANTHROPIC_API_KEY,
 });
 
+function extractJSON(text: string): string {
+  const start = text.indexOf("{");
+  const end = text.lastIndexOf("}");
+  if (start === -1 || end === -1) throw new Error("No JSON object found in response");
+  return text.slice(start, end + 1);
+}
+
 // ─── Regulatory Reference Context ────────────────────────────────────────────
 // Authoritative excerpts from five frameworks injected into agent system prompts.
 // Agents are instructed to cite specific clause IDs in every score rationale
@@ -259,8 +266,7 @@ Score each of the 6 criteria now.`;
   });
 
   const text = (response.content[0] as { text: string }).text.trim();
-  const cleaned = text.replace(/```json\n?/g, "").replace(/```\n?/g, "").trim();
-  const parsed = JSON.parse(cleaned);
+  const parsed = JSON.parse(extractJSON(text));
   return parsed.scores as CriterionScore[];
 }
 
@@ -332,8 +338,7 @@ Generate controls and recommendations now.`;
   });
 
   const text = (response.content[0] as { text: string }).text.trim();
-  const cleaned = text.replace(/```json\n?/g, "").replace(/```\n?/g, "").trim();
-  return JSON.parse(cleaned) as ControlsOutput;
+  return JSON.parse(extractJSON(text)) as ControlsOutput;
 }
 
 // ─── Agent 4: Guidance Writer ─────────────────────────────────────────────────
@@ -432,8 +437,7 @@ Return per-criterion confidence scores and any consistency issues.`;
   });
 
   const text = (response.content[0] as { text: string }).text.trim();
-  const cleaned = text.replace(/```json\n?/g, "").replace(/```\n?/g, "").trim();
-  return JSON.parse(cleaned) as ValidationOutput;
+  return JSON.parse(extractJSON(text)) as ValidationOutput;
 }
 
 // ─── Main Orchestration Function ──────────────────────────────────────────────
