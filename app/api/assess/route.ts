@@ -1,5 +1,13 @@
 import { NextResponse } from "next/server";
 import { runAssessmentPipeline, WizardInput } from "@/lib/agents";
+import {
+  isValidTextarea,
+  isValidShortText,
+  TEXTAREA_FIELDS,
+  SHORT_TEXT_FIELDS,
+  MIN_CHARS_SHORT,
+  TEXTAREA_ERROR_MSG,
+} from "@/lib/validation";
 
 export const maxDuration = 60; // Vercel function timeout in seconds
 
@@ -33,6 +41,28 @@ export async function POST(req: Request) {
     if (missing.length > 0) {
       return NextResponse.json(
         { error: `Missing required fields: ${missing.join(", ")}` },
+        { status: 400 }
+      );
+    }
+
+    // Short text quality check (toolName, department)
+    const shortTextErrors = SHORT_TEXT_FIELDS.filter(
+      (f) => !isValidShortText(String(body[f]))
+    );
+    if (shortTextErrors.length > 0) {
+      return NextResponse.json(
+        { error: `Fields too short (min ${MIN_CHARS_SHORT} chars): ${shortTextErrors.join(", ")}` },
+        { status: 400 }
+      );
+    }
+
+    // Textarea quality check — blocks garbage input before any agent calls
+    const textareaErrors = TEXTAREA_FIELDS.filter(
+      (f) => !isValidTextarea(String(body[f]))
+    );
+    if (textareaErrors.length > 0) {
+      return NextResponse.json(
+        { error: TEXTAREA_ERROR_MSG, invalidFields: textareaErrors },
         { status: 400 }
       );
     }

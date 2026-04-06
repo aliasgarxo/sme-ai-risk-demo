@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Navbar } from "@/components/Navbar";
+import { isValidTextarea, isValidShortText, TEXTAREA_ERROR_MSG } from "@/lib/validation";
 import {
   ArrowRight,
   ArrowLeft,
@@ -120,12 +121,19 @@ export default function WizardPage() {
 
   const canProceed = (): boolean => {
     if (currentStep === 0) return !!selectedUseCase;
-    if (currentStep === 1) return !!(details.toolName.trim() && details.department.trim());
-    if (currentQuestion) return !!(answers[currentQuestion.field]?.trim());
+    if (currentStep === 1) return isValidShortText(details.toolName) && isValidShortText(details.department);
+    if (currentQuestion) return isValidTextarea(answers[currentQuestion.field] ?? "");
     return false;
   };
 
   const handleNext = async () => {
+    setErrorMsg(null);
+
+    if (currentQuestion && !isValidTextarea(answers[currentQuestion.field] ?? "")) {
+      setErrorMsg(TEXTAREA_ERROR_MSG);
+      return;
+    }
+
     if (!canProceed()) return;
 
     if (currentStep < totalSteps - 1) {
