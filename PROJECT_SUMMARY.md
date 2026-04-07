@@ -1,6 +1,4 @@
 # SME AI Risk Watch — Project Summary
-### For Teammates: Report & Presentation Reference
-
 ---
 
 ## What Is This Project?
@@ -11,7 +9,7 @@ Many SMEs are now using AI tools — like ChatGPT, hiring screening software, or
 
 A business owner fills out a simple 8-question form about their AI tool, and the app produces a full risk assessment report — with risk scores, red flags, recommended actions, and a plain-language summary — all grounded in real regulatory frameworks.
 
-**Live Demo:** https://sme-ai-risk-demo.vercel.app/
+**Live Demo:** https://sme-ai-risk-demo-git-main-aliasgars-projects.vercel.app/
 
 ---
 
