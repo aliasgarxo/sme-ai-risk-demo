@@ -1,6 +1,6 @@
 # SME AI Risk Watch
 
-**Live Demo:** https://sme-ai-risk-demo.vercel.app/
+**Live Demo:** https://sme-ai-risk-demo-git-main-aliasgars-projects.vercel.app/
 
 A multi-agent AI risk assessment tool for Canadian small and medium enterprises (SMEs). Built as a final academic project, it helps non-technical business owners assess the ethical, privacy, and governance risks of their AI tools — and receive actionable, regulation-grounded recommendations.
 
